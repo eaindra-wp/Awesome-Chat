@@ -69,3 +69,6 @@ Script/**/*.plist
 =======
 # Add any directories, files, or patterns you don't want to be tracked by version control
 >>>>>>> f14a76a2e9e3a0c25e0b0174d902ac4b13a8bb23
+
+/.firebase
+/.firebaserc
