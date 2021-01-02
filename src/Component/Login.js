@@ -2,7 +2,7 @@ import firebase from 'firebase'
 import React, { Component } from 'react'
 import ReactLoading from 'react-loading'
 import { withRouter } from 'react-router-dom'
-import 'react-toastify/dist/ReactToastify.css'
+import 'react-toastify/dist/ReactToastify.css'  // For side success notificatiton
 import { myFirebase, myFirestore } from './../Config/MyFirebase'
 import './styles.css'
 import { AppString } from './Const'
@@ -25,7 +25,7 @@ class Login extends Component {
         if (localStorage.getItem(AppString.ID)) {
             this.setState({ isLoading: false }, () => {
                 this.setState({ isLoading: false })
-                this.props.showToast(1, 'Login success')
+                this.props.showToast(1, 'Login success') // For side success notificatiton
                 this.props.history.push('/main')
             })
         } else {
@@ -69,7 +69,8 @@ class Login extends Component {
                                     this.props.history.push('/main')
                                 })
                             })
-                    } else {
+                    } 
+                    else {
                         // Write user info to local
                         localStorage.setItem(AppString.ID, result.docs[0].data().id)
                         localStorage.setItem(

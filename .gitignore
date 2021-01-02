@@ -72,3 +72,9 @@ Script/**/*.plist
 
 /.firebase
 /.firebaserc
+/functions
+/database.rules.json
+/firebase-debug.log
+/firestore.indexes.json
+/firestore.rules
+/storage.rules

@@ -1,11 +1,12 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import ReactLoading from 'react-loading'
-import {withRouter} from 'react-router-dom'
-import {myFirebase, myFirestore} from './../Config/MyFirebase'
+import { withRouter } from 'react-router-dom'
+import { myFirebase, myFirestore } from './../Config/MyFirebase'
 import images from './Images'
 import './styles.css'
 import ChatBoard from './ChatBoard'
-import {AppString} from './Const'
+import { AppString } from './Const'
+import LastMessage from './LastMessage'
 
 class Main extends Component {
     constructor(props) {
@@ -13,12 +14,15 @@ class Main extends Component {
         this.state = {
             isLoading: true,
             isOpenDialogConfirmLogout: false,
-            currentPeerUser: null
+            currentPeerUser: null,
+            tempLastMsg : null
         }
         this.currentUserId = localStorage.getItem(AppString.ID)
         this.currentUserAvatar = localStorage.getItem(AppString.PHOTO_URL)
         this.currentUserUserName = localStorage.getItem(AppString.USERNAME)
         this.listUser = []
+        this.peerUserId = "";
+        this.groupChatId = null;
     }
 
     componentDidMount() {
@@ -27,10 +31,11 @@ class Main extends Component {
 
     checkLogin = () => {
         if (!localStorage.getItem(AppString.ID)) {
-            this.setState({isLoading: false}, () => {
+            this.setState({ isLoading: false }, () => {
                 this.props.history.push('/')
             })
-        } else {
+        }
+        else {
             this.getListUser()
         }
     }
@@ -39,7 +44,7 @@ class Main extends Component {
         const result = await myFirestore.collection(AppString.NODE_USERS).get()
         if (result.docs.length > 0) {
             this.listUser = [...result.docs]
-            this.setState({isLoading: false})
+            this.setState({ isLoading: false })
         }
     }
 
@@ -50,19 +55,19 @@ class Main extends Component {
     }
 
     doLogout = () => {
-        this.setState({isLoading: true})
+        this.setState({ isLoading: true })
         myFirebase
             .auth()
             .signOut()
             .then(() => {
-                this.setState({isLoading: false}, () => {
+                this.setState({ isLoading: false }, () => {
                     localStorage.clear()
                     this.props.showToast(1, 'Logout success')
                     this.props.history.push('/')
                 })
             })
             .catch(function (err) {
-                this.setState({isLoading: false})
+                this.setState({ isLoading: false })
                 this.props.showToast(0, err.message)
             })
     }
@@ -77,22 +82,46 @@ class Main extends Component {
         this.props.history.push('/profile')
     }
 
+    hashString = str => {
+        let hash = 0
+        for (let i = 0; i < str.length; i++) {
+            hash += Math.pow(str.charCodeAt(i) * 31, str.length - i)
+            hash = hash & hash // Convert to 32bit integer
+        }
+        return hash
+    }
+
+    getGroupChatId = () => {
+        var groupChatId = null;
+        // console.log(this.peerUserId);
+        if (this.hashString(this.currentUserId) <= this.peerUserId) {
+            groupChatId = `${this.currentUserId}-${this.peerUserId}`;
+        }
+        else {
+            groupChatId = `${this.peerUserId}-${this.currentUserId}`;
+        }
+        return groupChatId; 
+    }
+
     renderListUser = () => {
         if (this.listUser.length > 0) {
             let viewListUser = []
             this.listUser.forEach((item, index) => {
                 if (item.data().id !== this.currentUserId) {
+                    this.peerUserId = item.data().id;
+                    // this.finallyGetLastMsg();
+                    // this.groupChatId = this.getGroupChatId();
                     viewListUser.push(
                         <button
                             key={index}
                             className={
                                 this.state.currentPeerUser &&
-                                this.state.currentPeerUser.id === item.data().id
+                                    this.state.currentPeerUser.id === item.data().id
                                     ? 'viewWrapItemFocused'
                                     : 'viewWrapItem'
                             }
                             onClick={() => {
-                                this.setState({currentPeerUser: item.data()})
+                                this.setState({ currentPeerUser: item.data() })
                             }}
                         >
                             <img
@@ -101,19 +130,18 @@ class Main extends Component {
                                 alt="icon avatar"
                             />
                             <div className="viewWrapContentItem">
-                <span className="textItem">{`${
-                    item.data().username
-                    }`}</span>
-                                <span className="textItem">{`${
-                                    item.data().id
-                                    }`}</span>
+                                <span className="textItem">
+                                    {`${item.data().username}`}
+                                </span>
+                                <LastMessage groupChatId= {this.getGroupChatId()} />
                             </div>
                         </button>
                     )
                 }
             })
             return viewListUser
-        } else {
+        }
+        else {
             return null
         }
     }
@@ -148,20 +176,19 @@ class Main extends Component {
                                 showToast={this.props.showToast}
                             />
                         ) : (
-                            <div className="viewWelcomeBoard">
-                            <span className="textTitleWelcome">{`Welcome, ${
-                                this.currentUserUserName
-                                }`}</span>
-                            <img
-                                className="avatarWelcome"
-                                src={this.currentUserAvatar}
-                                alt={this.currentUserUserName}
-                            />
-                            <span className="textDesciptionWelcome">
-                                Let's start chatting with your friends!
+                                <div className="viewWelcomeBoard">
+                                    <span className="textTitleWelcome">{`Welcome, ${this.currentUserUserName
+                                        }`}</span>
+                                    <img
+                                        className="avatarWelcome"
+                                        src={this.currentUserAvatar}
+                                        alt={this.currentUserUserName}
+                                    />
+                                    <span className="textDesciptionWelcome">
+                                        Let's start chatting with your friends!
                             </span>
-                        </div>
-                        )}
+                                </div>
+                            )}
                     </div>
                 </div>
 

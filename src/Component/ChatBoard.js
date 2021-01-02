@@ -54,12 +54,12 @@ export default class ChatBoard extends Component {
         }
         this.listMessage.length = 0
         this.setState({isLoading: true})
-        if (
-            this.hashString(this.currentUserId) <=
-            this.hashString(this.currentPeerUser.id)
-        ) {
+        if (this.hashString(this.currentUserId) <=
+            this.hashString(this.currentPeerUser.id)) 
+        {
             this.groupChatId = `${this.currentUserId}-${this.currentPeerUser.id}`
-        } else {
+        } 
+        else {
             this.groupChatId = `${this.currentPeerUser.id}-${this.currentUserId}`
         }
 
@@ -69,7 +69,8 @@ export default class ChatBoard extends Component {
             .doc(this.groupChatId)
             .collection(this.groupChatId)
             .onSnapshot(
-                snapshot => {
+                snapshot => 
+                {
                     snapshot.docChanges().forEach(change => {
                         if (change.type === AppString.DOC_ADDED) {
                             this.listMessage.push(change.doc.data())
@@ -128,13 +129,16 @@ export default class ChatBoard extends Component {
             this.currentPhotoFile = event.target.files[0]
             // Check this file is an image?
             const prefixFiletype = event.target.files[0].type.toString()
-            if (prefixFiletype.indexOf(AppString.PREFIX_IMAGE) === 0) {
+            if (prefixFiletype.indexOf(AppString.PREFIX_IMAGE) === 0) 
+            {
                 this.uploadPhoto()
-            } else {
+            } 
+            else {
                 this.setState({isLoading: false})
                 this.props.showToast(0, 'This file is not an image')
             }
-        } else {
+        } 
+        else {
             this.setState({isLoading: false})
         }
     }
@@ -164,7 +168,8 @@ export default class ChatBoard extends Component {
                     })
                 }
             )
-        } else {
+        } 
+        else {
             this.setState({isLoading: false})
             this.props.showToast(0, 'File is null')
         }
@@ -193,8 +198,8 @@ export default class ChatBoard extends Component {
                         alt="icon avatar"
                     />
                     <span className="textHeaderChatBoard">
-            {this.currentPeerUser.UserName}
-          </span>
+                        {this.currentPeerUser.UserName}
+                    </span>
                 </div>
 
                 {/* List message */}
@@ -270,17 +275,21 @@ export default class ChatBoard extends Component {
 
     renderListMessage = () => {
         if (this.listMessage.length > 0) {
+            // console.log("chatboard: " + this.listMessage.length);
             let viewListMessage = []
             this.listMessage.forEach((item, index) => {
                 if (item.idFrom === this.currentUserId) {
                     // Item right (my message)
+                    // text message
                     if (item.type === 0) {
                         viewListMessage.push(
                             <div className="viewItemRight" key={item.timestamp}>
                                 <span className="textContentItem">{item.content}</span>
                             </div>
                         )
-                    } else if (item.type === 1) {
+                    } 
+                    // images
+                    else if (item.type === 1) {
                         viewListMessage.push(
                             <div className="viewItemRight2" key={item.timestamp}>
                                 <img
@@ -290,7 +299,8 @@ export default class ChatBoard extends Component {
                                 />
                             </div>
                         )
-                    } else {
+                    } 
+                    else {
                         viewListMessage.push(
                             <div className="viewItemRight3" key={item.timestamp}>
                                 <img
@@ -327,7 +337,8 @@ export default class ChatBoard extends Component {
                                 ) : null}
                             </div>
                         )
-                    } else if (item.type === 1) {
+                    } 
+                    else if (item.type === 1) {
                         viewListMessage.push(
                             <div className="viewWrapItemLeft2" key={item.timestamp}>
                                 <div className="viewWrapItemLeft3">
@@ -350,12 +361,14 @@ export default class ChatBoard extends Component {
                                 </div>
                                 {this.isLastMessageLeft(index) ? (
                                     <span className="textTimeLeft">
-                    {moment(Number(item.timestamp)).format('ll')}
+                                {moment(Number(item.timestamp)).format('ll')}
+                                {/* Month name, day of month, year. e.g: Sep 4, 1986*/}
                   </span>
                                 ) : null}
                             </div>
                         )
-                    } else {
+                    } 
+                    else {
                         viewListMessage.push(
                             <div className="viewWrapItemLeft2" key={item.timestamp}>
                                 <div className="viewWrapItemLeft3">
@@ -387,7 +400,8 @@ export default class ChatBoard extends Component {
                 }
             })
             return viewListMessage
-        } else {
+        } 
+        else {
             return (
                 <div className="viewWrapSayHi">
                     <span className="textSayHi">Say hi to new friend</span>
