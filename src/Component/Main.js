@@ -82,35 +82,12 @@ class Main extends Component {
         this.props.history.push('/profile')
     }
 
-    hashString = str => {
-        let hash = 0
-        for (let i = 0; i < str.length; i++) {
-            hash += Math.pow(str.charCodeAt(i) * 31, str.length - i)
-            hash = hash & hash // Convert to 32bit integer
-        }
-        return hash
-    }
-
-    getGroupChatId = () => {
-        var groupChatId = null;
-        // console.log(this.peerUserId);
-        if (this.hashString(this.currentUserId) <= this.peerUserId) {
-            groupChatId = `${this.currentUserId}-${this.peerUserId}`;
-        }
-        else {
-            groupChatId = `${this.peerUserId}-${this.currentUserId}`;
-        }
-        return groupChatId; 
-    }
-
     renderListUser = () => {
         if (this.listUser.length > 0) {
             let viewListUser = []
             this.listUser.forEach((item, index) => {
                 if (item.data().id !== this.currentUserId) {
                     this.peerUserId = item.data().id;
-                    // this.finallyGetLastMsg();
-                    // this.groupChatId = this.getGroupChatId();
                     viewListUser.push(
                         <button
                             key={index}
@@ -133,7 +110,11 @@ class Main extends Component {
                                 <span className="textItem">
                                     {`${item.data().username}`}
                                 </span>
-                                <LastMessage groupChatId= {this.getGroupChatId()} />
+                                <LastMessage 
+                                    currentUserId={this.currentUserId} 
+                                    peerUserId={this.peerUserId}
+                                    peerUserName={item.data().username}
+                                />
                             </div>
                         </button>
                     )

@@ -7,13 +7,40 @@ class LastMessage extends Component {
         super(props)
         this.state = {
             tempLastMsg: null,
-            // groupChatId: null,
+            sender: null,
         }
-        this.groupChatId = this.props.groupChatId;
+        this.groupChatId = "";
+        this.currentUserId = this.props.currentUserId;
+        this.peerUserId = this.props.peerUserId;
+        this.peerUserName =  this.props.peerUserName;
     }
 
     componentDidMount() {
-        this.finallyGetLastMsg()
+        this.getGroupChatId();
+        this.finallyGetLastMsg();
+        this.getLastMsgSender();
+    }
+
+    hashString = str => {
+        let hash = 0
+        for (let i = 0; i < str.length; i++) {
+            hash += Math.pow(str.charCodeAt(i) * 31, str.length - i)
+            hash = hash & hash // Convert to 32bit integer
+        }
+        return hash
+    }
+
+    getGroupChatId = () => {
+        var groupChatId = null;
+        // console.log(this.peerUserId);
+        if (this.hashString(this.currentUserId) <= this.hashString(this.peerUserId)) {
+            groupChatId = `${this.currentUserId}-${this.peerUserId}`;
+        }
+        else {
+            groupChatId = `${this.peerUserId}-${this.currentUserId}`;
+        }
+        console.log(groupChatId);
+        this.groupChatId = groupChatId;
     }
 
     checkListMessage = async () => {
@@ -36,7 +63,6 @@ class LastMessage extends Component {
                     this.props.showToast(0, err.toString())
                 }
             );
-        // console.log(listMessage.length);
         return listMessage;
     }
     printLastMsg = async () => {
@@ -44,34 +70,57 @@ class LastMessage extends Component {
             // console.log(result); // "initResolve"
             return new Promise(function (resolve, reject) {
                 setTimeout(function () {
-                    console.log(result[result.length - 1]);
+                    // console.log(result[result.length - 1]);
                     let msgType = result[result.length - 1].type;
                     let str;
-                    if(msgType === 0){
+                    if (msgType === 0) {
                         str = result[result.length - 1].content;
                     }
-                    else if(msgType === 1){
+                    else if (msgType === 1) {
                         str = "Sent an image";
                     }
-                    else if(msgType === 2){
+                    else if (msgType === 2) {
                         str = "Sent a sticker";
                     }
                     resolve(str);
                 }, 1000)
             })
         });
-        // this.setState({tempLastMsg: result});
+    }
+
+    lastMsgSender = async () => {
+        return await this.checkListMessage().then(function (result) {
+            // console.log(result); // "initResolve"
+            return new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    let str = result[result.length - 1].idFrom;
+                    resolve(str);
+                }, 1000)
+            })
+        });
+    }
+
+    getLastMsgSender = async () => {
+        let message = await this.lastMsgSender();
+        console.log(message);
+        let sender;
+        if (message === this.currentUserId) {
+            sender = "You";
+        }
+        else {
+            sender = this.peerUserName;
+        }
+        this.setState({ sender: sender });
     }
 
     finallyGetLastMsg = async () => {
         let message = await this.printLastMsg();
-        // console.log(message);
         this.setState({ tempLastMsg: message });
     }
     render() {
         return (
             <span className="textItem">
-                {`${this.state.tempLastMsg}`}
+                {`${this.state.sender} : ${this.state.tempLastMsg}`}
             </span>
         )
     }
